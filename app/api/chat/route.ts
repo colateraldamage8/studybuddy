@@ -148,11 +148,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    console.error('[StudyBuddy] API route error:', error);
-
     // Anthropic API errors
     if (error instanceof Anthropic.APIError) {
       const status = error.status ?? 500;
+      console.error(`[StudyBuddy] Anthropic API error: status=${status} type=${error.name} message=${error.message}`);
 
       if (status === 401) {
         return NextResponse.json(
@@ -175,7 +174,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             error:
-              'StudyBuddy is having a little nap. Please try again shortly!',
+              'StudyBuddy is having a little nap. Please try again shortly! 😴',
           },
           { status: 503 }
         );
@@ -186,6 +185,9 @@ export async function POST(request: NextRequest) {
         { status }
       );
     }
+
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[StudyBuddy] Unexpected error in /api/chat: ${message}`);
 
     return NextResponse.json(
       {

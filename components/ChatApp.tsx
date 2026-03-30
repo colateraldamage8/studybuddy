@@ -318,6 +318,7 @@ export default function ChatApp() {
         });
 
         if (!response.ok) {
+          const status = response.status;
           let errorMsg = 'Something went wrong. Please try again.';
           try {
             const errorData = await response.json();
@@ -325,7 +326,8 @@ export default function ChatApp() {
           } catch {
             // ignore JSON parse error
           }
-          throw new Error(errorMsg);
+          console.warn(`[StudyBuddy] /api/chat failed: HTTP ${status} — ${errorMsg}`);
+          throw Object.assign(new Error(errorMsg), { httpStatus: status });
         }
 
         if (!response.body) {
@@ -370,19 +372,21 @@ export default function ChatApp() {
           err instanceof Error
             ? err.message
             : 'Something went wrong. Please try again.';
+        const httpStatus = (err as { httpStatus?: number }).httpStatus;
 
         setError(errorMessage);
 
-        // Replace the placeholder with an error message
+        // For known transient server errors, the server already wrote a
+        // kid-friendly message — surface it in the bubble. For everything
+        // else, use a generic fallback.
+        const bubbleContent =
+          httpStatus === 503 || httpStatus === 429
+            ? `${errorMessage} 🙏`
+            : "Oops! Something went wrong on my end. Please try asking again! 😊";
+
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === assistantId
-              ? {
-                  ...m,
-                  content:
-                    "Oops! Something went wrong on my end. Please try asking again! 😊",
-                }
-              : m
+            m.id === assistantId ? { ...m, content: bubbleContent } : m
           )
         );
       } finally {
@@ -722,6 +726,34 @@ export default function ChatApp() {
               >
                 🇪🇸 Practice
               </button>
+              <div className="w-16 flex-shrink-0" aria-hidden="true" />
+            </div>
+          </div>
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-14 z-10 bg-gradient-to-l from-white to-transparent" />
+        </div>
+      )}
+
+      {/* ── Science sub-topics bar ── */}
+      {profile?.subject === Subject.Science && (
+        <div className="relative bg-white border-b border-gray-100 shadow-sm overflow-hidden">
+          <div className="max-w-3xl mx-auto px-4 py-2">
+            <div className="flex items-center gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wide whitespace-nowrap mr-1">{profile.subject}:</span>
+              {[
+                { label: 'Forces',      emoji: '⚡' },
+                { label: 'Plants',      emoji: '🌱' },
+                { label: 'Human Body',  emoji: '🫀' },
+                { label: 'Space',       emoji: '🚀' },
+                { label: 'Materials',   emoji: '🧪' },
+              ].map((topic) => (
+                <button
+                  key={topic.label}
+                  onClick={() => handleSendMessage(`I need help with ${topic.label.toLowerCase()} in Science.`)}
+                  className="whitespace-nowrap bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-sm px-3 py-1.5 rounded-xl border border-blue-200 transition-colors"
+                >
+                  {topic.emoji} {topic.label}
+                </button>
+              ))}
               <div className="w-16 flex-shrink-0" aria-hidden="true" />
             </div>
           </div>
