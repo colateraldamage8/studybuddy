@@ -88,7 +88,7 @@ export default function DailyPractice({
       label: doneToday ? 'Daily Practice ✅' : 'Daily Practice ⭐',
       sub: doneToday
         ? todayScore ? `${todayScore.score}/${todayScore.total} today — come back tomorrow!` : 'Completed today!'
-        : '5 quick questions · Spelling, Maths & General',
+        : '15-minute session · Spelling, Maths & General',
       onClick: doneToday ? undefined : onShowDailyGame,
       disabled: doneToday === null || doneToday,
       style: doneToday
