@@ -9,7 +9,7 @@ interface AuthModalProps {
   onSuccess: () => void;
 }
 
-type AuthMode = 'login' | 'register';
+type AuthMode = 'login' | 'register' | 'forgot';
 
 export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
   const [mode, setMode] = useState<AuthMode>('login');
@@ -25,7 +25,16 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     setError(null);
     setLoading(true);
 
-    if (mode === 'register') {
+    if (mode === 'forgot') {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://studybuddy.cabreraai.com/reset-password',
+      });
+      if (resetError) {
+        setError(resetError.message);
+      } else {
+        setSuccess('If an account exists for that email, a reset link has been sent.');
+      }
+    } else if (mode === 'register') {
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -61,10 +70,10 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-5 flex items-center justify-between">
           <div>
             <h2 className="text-white font-extrabold text-xl">
-              {mode === 'login' ? 'Welcome back! 👋' : 'Create an account 🌟'}
+              {mode === 'login' ? 'Welcome back! 👋' : mode === 'register' ? 'Create an account 🌟' : 'Reset password 🔑'}
             </h2>
             <p className="text-white/80 text-sm mt-0.5">
-              {mode === 'login' ? 'Sign in to save your progress' : 'Save progress and track learning'}
+              {mode === 'login' ? 'Sign in to save your progress' : mode === 'register' ? 'Save progress and track learning' : "We'll send you a reset link"}
             </p>
           </div>
           <button onClick={onClose} className="text-white/70 hover:text-white text-2xl font-bold">✕</button>
@@ -115,36 +124,62 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Min. 6 characters"
-              required
-              minLength={6}
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 font-medium focus:outline-none focus:border-blue-400 transition-colors"
-            />
-          </div>
+          {mode !== 'forgot' && (
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Min. 6 characters"
+                required
+                minLength={6}
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-gray-800 font-medium focus:outline-none focus:border-blue-400 transition-colors"
+              />
+            </div>
+          )}
+
+          {mode === 'login' && (
+            <div className="text-right -mt-2">
+              <button
+                type="button"
+                onClick={() => { setMode('forgot'); setError(null); setSuccess(null); }}
+                className="text-sm text-blue-500 font-medium hover:text-blue-700"
+              >
+                Forgot password?
+              </button>
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={loading}
             className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-bold py-3 rounded-xl transition-colors text-base"
           >
-            {loading ? '...' : mode === 'login' ? 'Sign In' : 'Create Account'}
+            {loading ? '...' : mode === 'login' ? 'Sign In' : mode === 'register' ? 'Create Account' : 'Send reset link'}
           </button>
 
           <p className="text-center text-sm text-gray-500">
-            {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-            <button
-              type="button"
-              onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(null); setSuccess(null); }}
-              className="text-blue-500 font-bold hover:text-blue-700"
-            >
-              {mode === 'login' ? 'Register' : 'Sign In'}
-            </button>
+            {mode === 'forgot' ? (
+              <button
+                type="button"
+                onClick={() => { setMode('login'); setError(null); setSuccess(null); }}
+                className="text-blue-500 font-bold hover:text-blue-700"
+              >
+                Back to sign in
+              </button>
+            ) : (
+              <>
+                {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+                <button
+                  type="button"
+                  onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(null); setSuccess(null); }}
+                  className="text-blue-500 font-bold hover:text-blue-700"
+                >
+                  {mode === 'login' ? 'Register' : 'Sign In'}
+                </button>
+              </>
+            )}
           </p>
         </form>
       </motion.div>
