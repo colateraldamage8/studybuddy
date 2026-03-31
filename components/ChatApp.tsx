@@ -409,6 +409,40 @@ export default function ChatApp() {
   if (step === 'age') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+        {/* Auth actions — top-right */}
+        <div className="absolute top-4 right-4">
+          {user ? (
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-2 bg-white border border-gray-200 rounded-2xl px-3 py-2 shadow-sm hover:border-red-200 hover:text-red-500 transition-colors"
+            >
+              <span className="w-7 h-7 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 font-extrabold text-sm">
+                {user.email?.[0]?.toUpperCase() ?? '?'}
+              </span>
+              <span className="text-xs font-bold text-gray-500 hover:text-red-500">Sign Out</span>
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowAuth(true)}
+                className="bg-white border border-gray-200 rounded-2xl px-4 py-2 shadow-sm text-sm font-bold text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-colors"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => setShowAuth(true)}
+                className="bg-blue-500 hover:bg-blue-600 rounded-2xl px-4 py-2 shadow-sm text-sm font-bold text-white transition-colors"
+              >
+                Register
+              </button>
+            </div>
+          )}
+        </div>
+
+        {showAuth && (
+          <AuthModal onClose={() => setShowAuth(false)} onSuccess={() => setShowAuth(false)} />
+        )}
+
         {/* Logo / Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -425,6 +459,9 @@ export default function ChatApp() {
           </h1>
           <p className="text-lg text-gray-500 font-medium">
             Your friendly AI homework helper 📚
+          </p>
+          <p className="text-sm text-gray-400 mt-2">
+            Parents: sign in to save progress and track homework
           </p>
         </motion.div>
 
@@ -448,6 +485,40 @@ export default function ChatApp() {
   if (step === 'subject') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+        {/* Auth actions — top-right */}
+        <div className="absolute top-4 right-4">
+          {user ? (
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-2 bg-white border border-gray-200 rounded-2xl px-3 py-2 shadow-sm hover:border-red-200 hover:text-red-500 transition-colors"
+            >
+              <span className="w-7 h-7 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 font-extrabold text-sm">
+                {user.email?.[0]?.toUpperCase() ?? '?'}
+              </span>
+              <span className="text-xs font-bold text-gray-500 hover:text-red-500">Sign Out</span>
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowAuth(true)}
+                className="bg-white border border-gray-200 rounded-2xl px-4 py-2 shadow-sm text-sm font-bold text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-colors"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => setShowAuth(true)}
+                className="bg-blue-500 hover:bg-blue-600 rounded-2xl px-4 py-2 shadow-sm text-sm font-bold text-white transition-colors"
+              >
+                Register
+              </button>
+            </div>
+          )}
+        </div>
+
+        {showAuth && (
+          <AuthModal onClose={() => setShowAuth(false)} onSuccess={() => setShowAuth(false)} />
+        )}
+
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
